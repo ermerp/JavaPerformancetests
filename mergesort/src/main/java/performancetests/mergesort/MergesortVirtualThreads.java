@@ -1,6 +1,26 @@
 package performancetests.mergesort;
 
-public class Mergsort {
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+
+public class MergesortVirtualThreads {
+
+    public static void runAllMergeSort(List<int[]> arrays){
+
+        ArrayList<Future<?>> futureList;
+        try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+
+            futureList = new ArrayList<>();
+            arrays.forEach(a -> futureList.add(
+                    executor.submit(() -> mergeSort(a))));
+        }
+
+    }
+
     public static void mergeSort(int[] array) {
         if (array == null || array.length <= 1) {
             return;
@@ -16,6 +36,19 @@ public class Mergsort {
         if (array.length - mid >= 0)
             System.arraycopy(array, mid, rightArray,
                     0, array.length - mid);
+
+//        try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+//            var future1 = executor.submit(() -> mergeSort(leftArray));
+//            var future2 = executor.submit(() -> mergeSort(rightArray));
+//            future1.get();
+//            future2.get();
+//            merge(leftArray, rightArray, array);
+//        } catch (ExecutionException e) {
+//            throw new RuntimeException(e);
+//        } catch (InterruptedException e) {
+//            throw new RuntimeException(e);
+//        }
+
 
         mergeSort(leftArray);
         mergeSort(rightArray);

@@ -4,10 +4,10 @@
 
 ### build
 ```
-./gradle clean build
+./gradlew clean build
 ```
 
 ### run: mergesort
 ```
-./gradle :mergesort:run
+./gradlew :mergesort:run
 ```
