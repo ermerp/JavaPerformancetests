@@ -3,20 +3,19 @@ package performancetests.mergesort;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-public class MergesortVirtualThreads {
+public class MergesortPlatformThreads {
 
     public static List<int[]> runAllMergeSort(String fileName){
 
         ArrayList<Future<?>> futureList = new ArrayList<>();;
         List<int[]> sortedLists = new ArrayList<>();
-        try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+        try (var executor = Executors.newCachedThreadPool()) {
             try {
                 BufferedReader reader = new BufferedReader(new FileReader(fileName));
                 String line;
@@ -61,7 +60,7 @@ public class MergesortVirtualThreads {
             System.arraycopy(array, mid, rightArray,
                     0, array.length - mid);
 
-//        try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+//        try (var executor = Executors.newCachedThreadPool()) {
 //            var future1 = executor.submit(() -> mergeSort(leftArray));
 //            var future2 = executor.submit(() -> mergeSort(rightArray));
 //
