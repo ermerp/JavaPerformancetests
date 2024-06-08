@@ -5,7 +5,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Random;
 
-public class DataGenerater {
+public class DataGenerator {
     public static File generateData(int amountOfLists, int lengthOfLists){
         File data = new File("Data"+amountOfLists+"x"+lengthOfLists+".txt");
         try {

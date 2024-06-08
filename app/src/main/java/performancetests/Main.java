@@ -5,7 +5,6 @@ import performancetests.mergesort.*;
 import java.io.File;
 import java.time.Duration;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 public class Main {
     public static void main(String[] args) {
@@ -21,7 +20,7 @@ public class Main {
         long time = 0;
 
         if(input.length == 3){
-            File data = DataGenerater.generateData(Integer.parseInt(input[1]), Integer.parseInt(input[2]));
+            File data = DataGenerator.generateData(Integer.parseInt(input[1]), Integer.parseInt(input[2]));
             List<int[]> list = null;
             if (input[0].equals("single")){
                 time = System.currentTimeMillis();

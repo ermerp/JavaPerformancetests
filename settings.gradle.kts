@@ -1,2 +1,2 @@
 rootProject.name = "performancetests"
-include("mergesort")
+include("app")
