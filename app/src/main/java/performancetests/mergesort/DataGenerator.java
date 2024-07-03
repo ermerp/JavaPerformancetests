@@ -6,11 +6,11 @@ import java.io.IOException;
 import java.util.Random;
 
 public class DataGenerator {
-    public static File generateData(int amountOfLists, int lengthOfLists){
-        File data = new File("Data"+amountOfLists+"x"+lengthOfLists+".txt");
+    public static File generateData(int listLength){
+        File data = new File("List"+listLength+".txt");
         try {
             if (data.createNewFile()) {
-                wirteToFile(data.getName(), amountOfLists, lengthOfLists);
+                wirteToFile(data.getName(), listLength);
                 System.out.println("File created: " + data.getName());
             } else {
                 System.out.println("File already exists.");
@@ -21,21 +21,15 @@ public class DataGenerator {
         return data;
     }
 
-    private static void wirteToFile(String filename, int amountOfLists, int lengthOfLists) throws IOException {
+    private static void wirteToFile(String filename, int listLength) throws IOException {
         FileWriter fileWriter = new FileWriter(filename);
-        fileWriter.write(amountOfLists + System.lineSeparator());
-        fileWriter.write(lengthOfLists + System.lineSeparator());
 
         Random random = new Random();
-        for(int i=0;i<amountOfLists;i++){
-            for(int j=0;j<lengthOfLists-1;j++){
-                fileWriter.write(random.nextInt(lengthOfLists)+",");
-            }
-            fileWriter.write(random.nextInt(lengthOfLists)+"");
-            if(i<amountOfLists-1) {
-                fileWriter.write(System.lineSeparator());
-            }
+        for(int j=0;j<listLength-1;j++){
+            fileWriter.write(random.nextInt(listLength)+",");
         }
+        fileWriter.write(random.nextInt(listLength)+"");
+
         fileWriter.close();
     }
 }

@@ -1,33 +1,32 @@
 package performancetests.mergesort;
 
-
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
 
 public class DataImporter {
 
-    public static List<int[]> importData(String fileName){
+    public static int[] importData(String filename) {
 
-        List<String> lines = null;
-        try {
-            lines = Files.readAllLines(Paths.get(fileName));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        String numberPart = filename.replace("List", "").replace(".txt", "");
+        int size = Integer.parseInt(numberPart);
 
-        List<int[]> arrays = new ArrayList<>();
-        for (int i = 2; i < lines.size(); i++) {
-            String[] splitLine = lines.get(i).split(",");
-            int[] intArray = new int[splitLine.length];
-            for (int j = 0; j < splitLine.length; j++) {
-                intArray[j] = Integer.parseInt(splitLine[j]);
+        int[] dataArray = new int[size];
+        int index = 0;
+
+        try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] values = line.split(",");
+                for (String value : values) {
+                    dataArray[index++] = Integer.parseInt(value);
+                }
             }
-            arrays.add(intArray);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
-        return arrays;
+        System.out.println("File imported.");
+        return dataArray;
     }
 }

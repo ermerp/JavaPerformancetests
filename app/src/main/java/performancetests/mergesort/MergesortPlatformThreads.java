@@ -1,52 +1,21 @@
 package performancetests.mergesort;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 public class MergesortPlatformThreads {
 
-    public static List<int[]> runAllMergeSort(String fileName){
-
-        ArrayList<Future<?>> futureList = new ArrayList<>();;
-        List<int[]> sortedLists = new ArrayList<>();
-        try (var executor = Executors.newCachedThreadPool()) {
-            try {
-                BufferedReader reader = new BufferedReader(new FileReader(fileName));
-                String line;
-                reader.readLine();
-                reader.readLine();
-                while ((line = reader.readLine()) != null) {
-                    String[] splitLine = line.split(",");
-                    int[] intArray = new int[splitLine.length];
-                    for (int i = 0; i < splitLine.length; i++) {
-                        intArray[i] = Integer.parseInt(splitLine[i]);
-                    }
-                    futureList.add(executor.submit(() -> mergeSort(intArray)));
-                }
-                reader.close();
-                sortedLists = futureList.stream().map(future -> {
-                    try {
-                        return (int[]) future.get();
-                    } catch (InterruptedException | ExecutionException e) {
-                        throw new RuntimeException(e);
-                    }
-                }).toList();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+    public static void mergeSort(int[] array, int chunkSize) {
+        try (var cachedPool = Executors.newCachedThreadPool()) {
+            mergeSortNewThread(array, chunkSize, cachedPool);
         }
-        return sortedLists;
     }
 
-    public static int[] mergeSort(int[] array) {
+    public static void mergeSortNewThread(int[] array, int chunkSize, ExecutorService cachedPool) {
         if (array == null || array.length <= 1) {
-            return array;
+            return;
         }
 
         // Break the array in two halves
@@ -55,32 +24,45 @@ public class MergesortPlatformThreads {
         int[] rightArray = new int[array.length - mid];
 
         System.arraycopy(array, 0, leftArray, 0, mid);
+        System.arraycopy(array, mid, rightArray, 0, array.length - mid);
 
-        if (array.length - mid >= 0)
-            System.arraycopy(array, mid, rightArray,
-                    0, array.length - mid);
+        if(mid >= chunkSize) {
+            Future<?> leftFuture = cachedPool.submit(() -> mergeSortNewThread(leftArray, chunkSize, cachedPool));
+            Future<?> rightFuture = cachedPool.submit(() -> mergeSortNewThread(rightArray, chunkSize, cachedPool));
 
-//        try (var executor = Executors.newCachedThreadPool()) {
-//            var future1 = executor.submit(() -> mergeSort(leftArray));
-//            var future2 = executor.submit(() -> mergeSort(rightArray));
-//
-//            return merge(future1.get(), future2.get());
-//        } catch (ExecutionException e) {
-//            throw new RuntimeException(e);
-//        } catch (InterruptedException e) {
-//            throw new RuntimeException(e);
-//        }
+            try {
+                leftFuture.get();
+                rightFuture.get();
+            } catch (InterruptedException | ExecutionException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            mergeSortSameThread(leftArray);
+            mergeSortSameThread(rightArray);
+        }
 
-        mergeSort(leftArray);
-        mergeSort(rightArray);
-        return merge(leftArray, rightArray);
+        merge(leftArray, rightArray, array);
     }
 
-    private static int[] merge(
-            int[] leftArray,
-            int[] rightArray
-    ) {
-        int[] result = new int[leftArray.length + rightArray.length];
+    public static void mergeSortSameThread(int[] array) {
+        if (array == null || array.length <= 1) {
+            return;
+        }
+
+        // Break the array in two halves
+        int mid = array.length / 2;
+        int[] leftArray = new int[mid];
+        int[] rightArray = new int[array.length - mid];
+
+        System.arraycopy(array, 0, leftArray, 0, mid);
+        System.arraycopy(array, mid, rightArray, 0, array.length - mid);
+
+        mergeSortSameThread(leftArray);
+        mergeSortSameThread(rightArray);
+        merge(leftArray, rightArray, array);
+    }
+
+    private static void merge(int[] leftArray, int[] rightArray, int[] result) {
         int i = 0, j = 0, k = 0;
 
         // Effectively sorts left and right array
@@ -98,7 +80,5 @@ public class MergesortPlatformThreads {
         while (j < rightArray.length) {
             result[k++] = rightArray[j++];
         }
-
-        return result;
     }
 }
