@@ -12,7 +12,7 @@ public class Main {
 
         input[0] = "virtual";
         input[1] = "50000000";
-        int chunkSize = Integer.parseInt(input[1])/10000;
+        int chunkSize = Integer.parseInt(input[1])/8;
 
         System.out.println(input[0]+", "+input[1]);
 
@@ -29,12 +29,14 @@ public class Main {
             }
             case "virtual" -> {
                 time = System.currentTimeMillis();
-                MergesortVirtualThreads.mergeSort(list, chunkSize);
+                new MergesortVirtualThreads(chunkSize).mergeSort(list);
                 time = time - System.currentTimeMillis();
             }
             case "platform" -> {
                 time = System.currentTimeMillis();
-                MergesortPlatformThreads.mergeSort(list, chunkSize);
+                MergesortPlatformThreads pt = new MergesortPlatformThreads(chunkSize);
+                pt.mergeSort(list);
+                pt.shutdown();
                 time = time - System.currentTimeMillis();
             }
             default -> {
@@ -48,8 +50,13 @@ public class Main {
 
         System.out.println(input[0] + ", Time: " + Duration.ofMillis(time));
 
+//        int i = 0;
 //        for (int num : list) {
 //            System.out.print(num + ", ");
+//            i++;
+//            if(i > 1000){
+//                break;
+//            }
 //        }
 
     }

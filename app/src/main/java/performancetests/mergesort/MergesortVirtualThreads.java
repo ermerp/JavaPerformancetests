@@ -7,13 +7,15 @@ import java.util.concurrent.Future;
 
 public class MergesortVirtualThreads {
 
-    public static void mergeSort(int[] array, int chunkSize) {
-        try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
-            mergeSortNewThread(array, chunkSize, executor);
-        }
+    private final ExecutorService executor ;
+    private final int chunkSize;
+
+    public MergesortVirtualThreads(int chunkSize) {
+        this.executor = Executors.newVirtualThreadPerTaskExecutor();
+        this.chunkSize = chunkSize;
     }
 
-    public static void mergeSortNewThread(int[] array, int chunkSize, ExecutorService executor) {
+    public void mergeSort(int[] array) {
         if (array == null || array.length <= 1) {
             return;
         }
@@ -27,8 +29,8 @@ public class MergesortVirtualThreads {
         System.arraycopy(array, mid, rightArray, 0, array.length - mid);
 
         if(mid >= chunkSize) {
-            Future<?> leftFuture = executor.submit(() -> mergeSortNewThread(leftArray, chunkSize, executor));
-            Future<?> rightFuture = executor.submit(() -> mergeSortNewThread(rightArray, chunkSize, executor));
+            Future<?> leftFuture = executor.submit(() -> mergeSort(leftArray));
+            Future<?> rightFuture = executor.submit(() -> mergeSort(rightArray));
 
             try {
                 leftFuture.get();
@@ -37,28 +39,10 @@ public class MergesortVirtualThreads {
                 throw new RuntimeException(e);
             }
         } else {
-            mergeSortSameThread(leftArray);
-            mergeSortSameThread(rightArray);
+            mergeSort(leftArray);
+            mergeSort(rightArray);
         }
 
-        merge(leftArray, rightArray, array);
-    }
-
-    public static void mergeSortSameThread(int[] array) {
-        if (array == null || array.length <= 1) {
-            return;
-        }
-
-        // Break the array in two halves
-        int mid = array.length / 2;
-        int[] leftArray = new int[mid];
-        int[] rightArray = new int[array.length - mid];
-
-        System.arraycopy(array, 0, leftArray, 0, mid);
-        System.arraycopy(array, mid, rightArray, 0, array.length - mid);
-
-        mergeSortSameThread(leftArray);
-        mergeSortSameThread(rightArray);
         merge(leftArray, rightArray, array);
     }
 
