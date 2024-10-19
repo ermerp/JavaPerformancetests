@@ -10,7 +10,7 @@ public class DataGenerator {
         File data = new File("List"+listLength+".txt");
         try {
             if (data.createNewFile()) {
-                wirteToFile(data.getName(), listLength);
+                writeToFile(data.getName(), listLength);
                 System.out.println("File created: " + data.getName());
             } else {
                 System.out.println("File already exists.");
@@ -21,14 +21,14 @@ public class DataGenerator {
         return data;
     }
 
-    private static void wirteToFile(String filename, int listLength) throws IOException {
+    private static void writeToFile(String filename, int listLength) throws IOException {
         FileWriter fileWriter = new FileWriter(filename);
 
         Random random = new Random();
         for(int j=0;j<listLength-1;j++){
-            fileWriter.write(random.nextInt(listLength)+",");
+            fileWriter.write(random.nextInt(Integer.MAX_VALUE)+",");
         }
-        fileWriter.write(random.nextInt(listLength)+"");
+        fileWriter.write(random.nextInt(Integer.MAX_VALUE)+"");
 
         fileWriter.close();
     }

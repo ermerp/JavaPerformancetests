@@ -6,49 +6,58 @@ import java.io.File;
 import java.time.Duration;
 
 public class Main {
+
     public static void main(String[] args) {
 
-        String[] input = new String[3];
+        String algorithm = (args.length > 0 && args[0] != null && !args[0].isEmpty())
+                ? args[0] : "virtual";
+        int listLength = (args.length > 1 && args[1] != null && !args[1].isEmpty())
+                ? Integer.parseInt(args[1]) : 30000000;
+        //Max: 60000000
+        int chunkNumber = (args.length > 2 && args[2] != null && !args[2].isEmpty())
+                ? Integer.parseInt(args[2]) : 16;
+        int runs = (args.length > 3 && args[3] != null && !args[3].isEmpty())
+                ? Integer.parseInt(args[3]) : 1;
+        int chunkSize = listLength/chunkNumber;
 
-        input[0] = "virtual";
-        input[1] = "50000000";
-        int chunkSize = Integer.parseInt(input[1])/8;
+        System.out.println("Java - Algorithm: " + algorithm
+                + ", List length: " + listLength
+                + ", Chunk number: " + chunkNumber
+                + ", Runs: " + runs);
 
-        System.out.println(input[0]+", "+input[1]);
-
-        File data = DataGenerator.generateData(Integer.parseInt(input[1]));
+        File data = DataGenerator.generateData(listLength);
         int[] list = DataImporter.importData(data.getName());
 
         long time = 0;
 
-        switch (input[0]) {
+        time = System.currentTimeMillis();
+        for (int i = 0; i < runs; i++) {
+            runAlgorithm(algorithm, list.clone(), chunkSize);
+        }
+        time = time - System.currentTimeMillis();
+
+        System.out.println("Java - " + algorithm + ", Time: " + Duration.ofMillis(time));
+
+    }
+
+    private static void runAlgorithm(String algorithm, int[] list, int chunkSize) {
+
+        switch (algorithm) {
             case "single" -> {
-                time = System.currentTimeMillis();
                 Mergesort.mergeSort(list);
-                time = time - System.currentTimeMillis();
             }
             case "virtual" -> {
-                time = System.currentTimeMillis();
                 new MergesortVirtualThreads(chunkSize).mergeSort(list);
-                time = time - System.currentTimeMillis();
             }
             case "platform" -> {
-                time = System.currentTimeMillis();
                 MergesortPlatformThreads pt = new MergesortPlatformThreads(chunkSize);
                 pt.mergeSort(list);
                 pt.shutdown();
-                time = time - System.currentTimeMillis();
             }
             default -> {
-                System.out.println("Unknown algorithm, fallback: single");
-                input[0] = "single";
-                time = System.currentTimeMillis();
-                Mergesort.mergeSort(list);
-                time = time - System.currentTimeMillis();
+                System.out.println("Unknown algorithm");
             }
         }
-
-        System.out.println(input[0] + ", Time: " + Duration.ofMillis(time));
 
 //        int i = 0;
 //        for (int num : list) {
@@ -58,6 +67,5 @@ public class Main {
 //                break;
 //            }
 //        }
-
     }
 }
