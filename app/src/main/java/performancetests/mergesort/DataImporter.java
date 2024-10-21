@@ -26,7 +26,6 @@ public class DataImporter {
             e.printStackTrace();
         }
 
-        System.out.println("File imported.");
         return dataArray;
     }
 }
