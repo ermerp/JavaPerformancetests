@@ -6,7 +6,7 @@ import java.io.IOException;
 
 public class DataImporter {
 
-    public static int[] importData(String filename) {
+    public static int[] importAccounts(String filename) {
 
         String numberPart = filename.replace("List", "").replace(".txt", "");
         int size = Integer.parseInt(numberPart);

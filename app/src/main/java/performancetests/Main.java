@@ -26,7 +26,7 @@ public class Main {
                 + ", Runs: " + runs);
 
         File data = DataGenerator.generateData(listLength);
-        int[] list = DataImporter.importData(data.getName());
+        int[] list = DataImporter.importAccounts(data.getName());
 
         System.out.println("File imported.");
 
