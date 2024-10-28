@@ -34,6 +34,16 @@ CREATE OR REPLACE FUNCTION transfer_balance(
     LANGUAGE plpgsql
 AS $$
 BEGIN
+    IF from_id < to_id THEN
+        -- Lock the row with the smaller id first
+        PERFORM 1 FROM account WHERE id = from_id FOR UPDATE;
+        PERFORM 1 FROM account WHERE id = to_id FOR UPDATE;
+    ELSE
+        -- Lock the row with the smaller id first
+        PERFORM 1 FROM account WHERE id = to_id FOR UPDATE;
+        PERFORM 1 FROM account WHERE id = from_id FOR UPDATE;
+    END IF;
+
     -- Subtract amount from from_id
     UPDATE account
     SET balance = balance - amount
