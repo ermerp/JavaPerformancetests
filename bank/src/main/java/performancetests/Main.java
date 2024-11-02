@@ -1,4 +1,6 @@
-package performancetests.bank;
+package performancetests;
+
+import performancetests.bank.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,8 +33,6 @@ public class Main {
         List<Transaction> transactions = BankDataImporter.importTransactions(transactionFile.getName());
 
         System.out.println("File imported.");
-
-        Thread.sleep(4000);
 
         long time = 0;
         time = System.currentTimeMillis();

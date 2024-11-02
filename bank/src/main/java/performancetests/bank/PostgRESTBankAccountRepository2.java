@@ -26,7 +26,6 @@ public class PostgRESTBankAccountRepository2 implements BankAccountRepository {
     public int book(String from, String to, double amount) throws Exception {
         int attempt = 0;
         while (attempt < MAX_RETRIES) {
-
             HttpURLConnection connection = setupConnection("transfer_balance");
             sendRequest(connection, "{ \"from_id\": \"" + from + "\", \"to_id\": \"" + to + "\", \"amount\": " + amount + " }");
             int responseCode = connection.getResponseCode();
