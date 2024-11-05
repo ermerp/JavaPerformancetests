@@ -9,23 +9,22 @@ import java.util.List;
 
 public class Main {
 
-    public static void main(String[] args) throws IOException, InterruptedException {
+    public static void main(String[] args) throws Exception {
 
-        // Set the working directory
-        File workingDir = new File("C:\\Users\\phili\\IdeaProjects\\JavaPerformancetests");
+//        // Set the working directory
+//        File workingDir = new File("C:\\Users\\phili\\IdeaProjects\\JavaPerformancetests");
+//
+//        // Execute docker-compose up
+//        executeCommand("docker-compose up -d", workingDir);
+//        Thread.sleep(4000);
 
-        // Execute docker-compose down -v
-        executeCommand("docker-compose down -v", workingDir);
-        Thread.sleep(2000);
+        int numberOfAccounts = 1000;
+        int numberOfTransactions = 10000;
 
-        // Execute docker-compose up
-        executeCommand("docker-compose up -d", workingDir);
-        Thread.sleep(4000);
+        //PostgRESTBankAccountRepository repository = new PostgRESTBankAccountRepository();
+        JDBCBankAccountRepository repository = new JDBCBankAccountRepository();
 
-        int numberOfAccounts = 100;
-        int numberOfTransactions = 1000;
-
-        PostgRESTBankAccountRepository2 repository = new PostgRESTBankAccountRepository2();
+        repository.deleteAllAccounts();
 
         createAccountsInDB(repository, numberOfAccounts);
 

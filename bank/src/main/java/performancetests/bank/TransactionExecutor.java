@@ -25,7 +25,7 @@ public class TransactionExecutor {
     }
 
     public void executeTransactionsVirtual(List<Transaction> transactions) {
-        int maxConnections = 8; // Set the maximum number of connections
+        int maxConnections = 10000000; // Set the maximum number of connections
         Semaphore semaphore = new Semaphore(maxConnections);
 
         try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {

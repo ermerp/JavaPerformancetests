@@ -26,6 +26,18 @@ EXCEPTION
 END;
 $$;
 
+CREATE OR REPLACE FUNCTION delete_all_accounts() RETURNS BOOLEAN
+    LANGUAGE plpgsql
+AS $$
+BEGIN
+    DELETE FROM account;
+    RETURN TRUE;
+EXCEPTION
+    WHEN OTHERS THEN
+        RETURN FALSE;
+END;
+$$;
+
 CREATE OR REPLACE FUNCTION transfer_balance(
     from_id TEXT,
     to_id TEXT,

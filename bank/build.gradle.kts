@@ -8,6 +8,9 @@ repositories {
 
 dependencies {
     implementation("com.fasterxml.jackson.core:jackson-databind:2.17.1")
+    implementation("org.postgresql:postgresql:42.7.2")
+    implementation("com.zaxxer:HikariCP:6.0.0")
+    implementation("org.slf4j:slf4j-simple:2.0.9")
 }
 
 application {
