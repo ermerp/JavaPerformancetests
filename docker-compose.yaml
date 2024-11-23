@@ -10,7 +10,7 @@ services:
       POSTGRES_DB: mydatabase
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./init2.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - pg_network
     ports:
@@ -30,34 +30,21 @@ services:
       - "3000:3000"
     networks:
       - pg_network
+
   swagger:
     image: swaggerapi/swagger-ui
     ports:
       - "8080:8080"
-    expose:
-      - "8080"
     environment:
-      API_URL: http://localhost:3000/
+      API_URL: http://postgrest:3000/
+    depends_on:
+      - postgrest
     networks:
       - pg_network
+
 networks:
   pg_network:
     driver: bridge
 
 volumes:
   postgres_data:
-
-#  CREATE ROLE anon;
-#  GRANT USAGE ON SCHEMA public TO anon;
-#  GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.account TO anon;
-
-
-#  ~/Projects/master_thesis/JavaPerformancetests main* ❯ curl "http://localhost:3000/account" \                                                                                                                              15:30:31
-#-X PATCH -H "Content-Type: application/json" \
-#-H "Prefer: resolution=merge-duplicates" \
-#  -d @- << EOF
-#  [
-#  { "id": "a9dc8c35-791f-470d-847d-cf4c40992452", "balance": 300 },
-#  { "id": "3fd055d3-1066-4f1f-b27a-0b0a0db07203", "balance": 0 }
-#]
-#  EOF

@@ -1,5 +1,6 @@
 plugins {
     application
+    id("com.github.johnrengelman.shadow") version "7.1.2"
 }
 
 repositories {
@@ -14,17 +15,40 @@ dependencies {
 }
 
 application {
-    // Define the main class for the application.
     mainClass.set("performancetests.Main")
 }
 
 tasks.jar {
-    archiveBaseName = "bankJava"
+    archiveBaseName.set("bankJava")
     manifest {
-        attributes("Main-Class" to "performancetests.Main")
+        attributes["Main-Class"] = "performancetests.Main"
     }
 }
 
 tasks.withType<org.gradle.api.tasks.compile.JavaCompile>().configureEach {
     options.compilerArgs.add("-Xlint:deprecation")
+}
+
+tasks {
+    named<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar>("shadowJar") {
+        archiveBaseName.set("bankJava")
+        archiveClassifier.set("")
+        archiveVersion.set("")
+    }
+
+    named<Zip>("distZip") {
+        dependsOn("shadowJar")
+    }
+
+    named<Tar>("distTar") {
+        dependsOn("shadowJar")
+    }
+
+    named<CreateStartScripts>("startScripts") {
+        dependsOn("shadowJar")
+    }
+
+    named<CreateStartScripts>("startShadowScripts") {
+        dependsOn("jar")
+    }
 }

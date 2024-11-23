@@ -10,7 +10,9 @@ import java.sql.SQLException;
 
 public class JDBCBankAccountRepository implements BankAccountRepository {
 
-    private static final String URL = "jdbc:postgresql://localhost:5432/mydatabase";
+    //private static final String URL = "jdbc:postgresql://localhost:5432/mydatabase";
+    private static final String DB_HOST = System.getenv("DB_HOST") != null ? System.getenv("DB_HOST") : "localhost";
+    private static final String URL = "jdbc:postgresql://" + DB_HOST + ":5432/mydatabase";
     private static final String USER = "myuser";
     private static final String PASSWORD = "mypassword";
     private static final HikariDataSource dataSource;
