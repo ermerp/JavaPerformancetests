@@ -2,8 +2,13 @@ package performancetests;
 
 import performancetests.bank.*;
 
-import java.io.File;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -11,9 +16,11 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
 
-        // Retrieve the environment variable
+        // Retrieve the environment variables
         String interfaceType = System.getenv("INTERFACE_TYPE") != null ? System.getenv("INTERFACE_TYPE") : "JDBC";
         String algorithm = System.getenv("ALGORITHM") != null ? System.getenv("ALGORITHM") : "VIRTUAL";
+        String maxConnectionsStr = System.getenv("MAX_CONNECTIONS");
+        int maxConnections = maxConnectionsStr != null ? Integer.parseInt(maxConnectionsStr) : 80;
 
         String numberOfAccountsStr = System.getenv("NUMBER_Of_ACCOUNTS");
         int numberOfAccounts = numberOfAccountsStr != null ? Integer.parseInt(numberOfAccountsStr) : 10;
@@ -23,6 +30,7 @@ public class Main {
 
         System.out.println("Java:Bank - Interface: " + interfaceType
                 + ", Algorithm: " + algorithm
+                + ", Max connections: " + maxConnections
                 + ", Number of accounts: " + numberOfAccounts
                 + ", Number of transactions: " + numberOfTransactions);
 
@@ -36,11 +44,10 @@ public class Main {
         repository.deleteAllAccounts();
 
         // Create accounts in the database
-        createAccountsInDB(repository, numberOfAccounts);
+        importAccounts(repository, numberOfAccounts);
 
-        // Generate transactions
-        File transactionFile = BankDataGenerator.generateTransactionFile(numberOfTransactions, numberOfAccounts);
-        List<Transaction> transactions = BankDataImporter.importTransactions(transactionFile.getName());
+        // import transactions
+        List<Transaction> transactions = importTransactions("/bankData/BankTransactions" + numberOfTransactions + "-" + numberOfAccounts + ".txt");
 
         System.out.println("File imported.");
 
@@ -61,18 +68,32 @@ public class Main {
         System.out.println("Java:Bank - Time: " + Duration.ofMillis(time));
     }
 
-    private static void createAccountsInDB(BankAccountRepository repository, int numberOfAccounts) {
-        // Generate accounts
-        File accountFile = BankDataGenerator.generateAccountFile(numberOfAccounts);
-        List<BankAccount> accounts = BankDataImporter.importAccounts(accountFile.getName());
+    public static void importAccounts(BankAccountRepository repository, int numberOfAccounts) throws Exception {
+        List<String> lines = Files.readAllLines(Paths.get("/bankData/BankAccounts" + numberOfAccounts + ".txt"));
+        for (String line : lines) {
+            String[] parts = line.split(", ");
+            String accountId = parts[0].trim();
+            double balance = Double.parseDouble(parts[1].trim().replace(",", "."));
+            repository.createAccount(accountId, balance);
+        }
+    }
 
-        // Create accounts in the database
-        try {
-            for (BankAccount account : accounts) {
-                repository.createAccount(account.id(), account.balance());
+    public static List<Transaction> importTransactions(String transactionsFilename) {
+        List<Transaction> transactions = new ArrayList<>();
+
+        try (BufferedReader br = new BufferedReader(new FileReader(transactionsFilename))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] parts = line.split(", ");
+                String fromAccountId = parts[0];
+                String toAccountId = parts[1];
+                double amount = Double.parseDouble(parts[2].replace(",", "."));
+                transactions.add(new Transaction(fromAccountId, toAccountId, amount));
             }
-        } catch (Exception e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
+
+        return transactions;
     }
 }

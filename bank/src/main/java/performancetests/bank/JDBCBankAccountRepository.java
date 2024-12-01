@@ -10,7 +10,6 @@ import java.sql.SQLException;
 
 public class JDBCBankAccountRepository implements BankAccountRepository {
 
-    //private static final String URL = "jdbc:postgresql://localhost:5432/mydatabase";
     private static final String DB_HOST = System.getenv("DB_HOST") != null ? System.getenv("DB_HOST") : "localhost";
     private static final String URL = "jdbc:postgresql://" + DB_HOST + ":5432/mydatabase";
     private static final String USER = "myuser";
@@ -22,11 +21,16 @@ public class JDBCBankAccountRepository implements BankAccountRepository {
         config.setJdbcUrl(URL);
         config.setUsername(USER);
         config.setPassword(PASSWORD);
+
+        // Set the maximum pool size
+        String maxConnectionsStr = System.getenv("MAX_CONNECTIONS");
+        int maxConnections = maxConnectionsStr != null ? Integer.parseInt(maxConnectionsStr) : 80;
+        config.setMaximumPoolSize(maxConnections);
+
         dataSource = new HikariDataSource(config);
     }
 
     private Connection getConnection() throws SQLException {
-        //return DriverManager.getConnection(URL, USER, PASSWORD);
         return dataSource.getConnection();
     }
 

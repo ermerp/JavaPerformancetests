@@ -7,7 +7,8 @@ import java.nio.charset.StandardCharsets;
 
 public class PostgRESTBankAccountRepository implements BankAccountRepository {
 
-    public static final String URL = "http://localhost:3000/rpc/";
+    private static final String DB_HOST = System.getenv("DB_HOST") != null ? System.getenv("DB_HOST") : "localhost";
+    public static final String URL = "http://" + DB_HOST + ":3000/rpc/";
     private static final int MAX_RETRIES = 100;
     private static final long RETRY_DELAY_MS = 1000;
 

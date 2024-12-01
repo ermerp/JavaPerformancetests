@@ -18,25 +18,35 @@ public class Main {
                 ? Integer.parseInt(args[2]) : 16;
         int runs = (args.length > 3 && args[3] != null && !args[3].isEmpty())
                 ? Integer.parseInt(args[3]) : 1;
+        int warmUpRuns = (args.length > 4 && args[4] != null && !args[4].isEmpty())
+                ? Integer.parseInt(args[4]) : 0;
         int chunkSize = listLength/chunkNumber;
 
-        System.out.println("Java - Algorithm: " + algorithm
+        System.out.println("Java:Mergesort - Algorithm: " + algorithm
                 + ", List length: " + listLength
                 + ", Chunk number: " + chunkNumber
-                + ", Runs: " + runs);
+                + ", Runs: " + runs + ", Warm up runs: " + warmUpRuns);
 
         File data = DataGenerator.generateData(listLength);
         int[] list = DataImporter.importAccounts(data.getName());
+
+        for (int i = 0; i < warmUpRuns; i++) {
+            int[] list2 = list.clone();
+            runAlgorithm(algorithm, list2, chunkSize);
+        }
 
         System.out.println("File imported.");
 
         long time = 0;
 
         time = System.currentTimeMillis();
+
         for (int i = 0; i < runs; i++) {
-            runAlgorithm(algorithm, list.clone(), chunkSize);
+            int[] list2 = list.clone();
+            runAlgorithm(algorithm, list2, chunkSize);
         }
-        time = time - System.currentTimeMillis();
+
+        time = System.currentTimeMillis() - time;
 
         System.out.println("Java - " + algorithm + ", Time: " + Duration.ofMillis(time));
 

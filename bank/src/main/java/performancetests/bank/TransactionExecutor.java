@@ -8,7 +8,6 @@ import java.util.concurrent.Semaphore;
 public class TransactionExecutor {
 
     private final BankAccountRepository repository;
-    private final int maxConnections = 10000; // Set the maximum number of connections
 
     public TransactionExecutor(BankAccountRepository repository) {
         this.repository = repository;
@@ -26,7 +25,9 @@ public class TransactionExecutor {
     }
 
     public void executeTransactionsVirtual(List<Transaction> transactions) {
-        Semaphore semaphore = new Semaphore(maxConnections);
+        Semaphore semaphore = (repository instanceof PostgRESTBankAccountRepository)
+                ? new Semaphore(System.getenv("MAX_CONNECTIONS") != null ? Integer.parseInt(System.getenv("MAX_CONNECTIONS")) : 80)
+                : null;
 
         try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
 
@@ -34,14 +35,12 @@ public class TransactionExecutor {
                 //startet neuen Virtual Thread
                 executor.submit(() -> {
                     try {
-                        semaphore.acquire();
-                        try {
-                            repository.book(transaction.from(), transaction.to(), transaction.amount());
-                        } finally {
-                            semaphore.release();
-                        }
+                        if (semaphore != null) semaphore.acquire();
+                        repository.book(transaction.from(), transaction.to(), transaction.amount());
                     } catch (Exception e) {
                         e.printStackTrace();
+                    } finally {
+                        if (semaphore != null) semaphore.release();
                     }
                 });
             }
@@ -49,14 +48,23 @@ public class TransactionExecutor {
     }
 
     public void executeTransactionsPlatform(List<Transaction> transactions) {
-        try (ExecutorService executor = Executors.newFixedThreadPool(maxConnections)) {
+
+        Semaphore semaphore = (repository instanceof PostgRESTBankAccountRepository)
+                ? new Semaphore(System.getenv("MAX_CONNECTIONS") != null ? Integer.parseInt(System.getenv("MAX_CONNECTIONS")) : 80)
+                : null;
+
+        try (ExecutorService executor = Executors.newCachedThreadPool()) {
+
             for (Transaction transaction : transactions) {
-                // Start a new platform thread
+                //startet neuen Virtual Thread
                 executor.submit(() -> {
                     try {
+                        if (semaphore != null) semaphore.acquire();
                         repository.book(transaction.from(), transaction.to(), transaction.amount());
                     } catch (Exception e) {
                         e.printStackTrace();
+                    } finally {
+                        if (semaphore != null) semaphore.release();
                     }
                 });
             }
