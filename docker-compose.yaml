@@ -46,7 +46,8 @@ services:
     environment:
       DB_HOST: postgres #postgres, postgrest, localhost
       INTERFACE_TYPE: JDBC #JDBC, REST
-      ALGORITHM: PLATFORM #VIRTUAL, PLATFORM, SINGLE
+      ALGORITHM: VIRTUAL #VIRTUAL, PLATFORM, SINGLE
+      MAX_CONNECTIONS: 80
       NUMBER_Of_ACCOUNTS: 10000
       NUMBER_OF_TRANSACTIONS: 100000
     volumes:

@@ -2,41 +2,37 @@ package performancetests.mergesort;
 
 public class Mergesort {
 
-    public static void mergeSort(int[] array) {
-        if (array == null || array.length <= 1) {
-            return;
-        }
-
-        // Break the array in two halves
-        int mid = array.length / 2;
-        int[] leftArray = new int[mid];
-        int[] rightArray = new int[array.length - mid];
-
-        System.arraycopy(array, 0, leftArray, 0, mid);
-        System.arraycopy(array, mid, rightArray, 0, array.length - mid);
-
-        mergeSort(leftArray);
-        mergeSort(rightArray);
-        merge(leftArray, rightArray, array);
+    public static void runMergeSort(int[] array) {
+        int[] tempArray = new int[array.length]; // Temporary array for the merge step
+        mergeSort(array, tempArray, 0, array.length - 1);
     }
 
-    private static void merge(int[] leftArray, int[] rightArray, int[] result) {
-        int i = 0, j = 0, k = 0;
+    private static void mergeSort(int[] array, int[] tempArray, int left, int right) {
+        if (left >= right) return;
 
-        // Effectively sorts left and right array
-        while (i < leftArray.length && j < rightArray.length) {
-            if (leftArray[i] <= rightArray[j]) {
-                result[k++] = leftArray[i++];
+        int mid = (left + right) / 2;
+        mergeSort(array, tempArray, left, mid);
+        mergeSort(array, tempArray, mid + 1, right);
+        merge(array, tempArray, left, mid, right);
+    }
+
+    private static void merge(int[] array, int[] tempArray, int left, int mid, int right) {
+        System.arraycopy(array, left, tempArray, left, right - left + 1);
+
+        int i = left;
+        int j = mid + 1;
+        int k = left;
+
+        while (i <= mid && j <= right) {
+            if (tempArray[i] <= tempArray[j]) {
+                array[k++] = tempArray[i++];
             } else {
-                result[k++] = rightArray[j++];
+                array[k++] = tempArray[j++];
             }
         }
 
-        while (i < leftArray.length) {
-            result[k++] = leftArray[i++];
-        }
-        while (j < rightArray.length) {
-            result[k++] = rightArray[j++];
+        while (i <= mid) {
+            array[k++] = tempArray[i++];
         }
     }
 }
