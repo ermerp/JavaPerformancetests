@@ -27,7 +27,7 @@ public class PostgRESTBankAccountRepository implements BankAccountRepository {
     }
 
     @Override
-    public int book(String from, String to, double amount) throws Exception {
+    public int book(String from, String to, double amount, double delay) throws Exception {
         int attempt = 0;
         while (attempt < MAX_RETRIES) {
             HttpURLConnection connection = setupConnection("transfer_balance");
@@ -49,6 +49,7 @@ public class PostgRESTBankAccountRepository implements BankAccountRepository {
                         attempt, from, to, amount, sleepTime)));
                 Thread.sleep(sleepTime);
             } else {
+                attempt++;
                 long sleepTime = calculateRetryDelay(attempt);
                 System.out.println(String.format("Error!!! Transfer failed - Code: %d Retrying after %d ms ...", responseCode, sleepTime));
                 Thread.sleep(sleepTime);
@@ -61,7 +62,7 @@ public class PostgRESTBankAccountRepository implements BankAccountRepository {
 
 
     private long calculateRetryDelay(int attempt) {
-        return RETRY_DELAY_MS * attempt + (long) (Math.random() * 5000);
+        return RETRY_DELAY_MS * attempt + (long) (Math.random() * 500);
     }
 
     private HttpURLConnection setupConnection(String endpoint) throws Exception {

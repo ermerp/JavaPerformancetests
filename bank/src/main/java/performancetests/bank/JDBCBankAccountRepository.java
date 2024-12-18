@@ -27,6 +27,9 @@ public class JDBCBankAccountRepository implements BankAccountRepository {
         int maxConnections = maxConnectionsStr != null ? Integer.parseInt(maxConnectionsStr) : 80;
         config.setMaximumPoolSize(maxConnections);
 
+        // Set the connection timeout
+        config.setConnectionTimeout(3600000); // 1 hour
+
         dataSource = new HikariDataSource(config);
     }
 
@@ -53,10 +56,11 @@ public class JDBCBankAccountRepository implements BankAccountRepository {
     }
 
     @Override
-    public int book(String from, String to, double amount) throws Exception {
+    public int book(String from, String to, double amount, double delay) throws Exception {
         String withdrawSql = "UPDATE account SET balance = balance - ? WHERE id = ?";
         String depositSql = "UPDATE account SET balance = balance + ? WHERE id = ?";
         String lockSql = "SELECT 1 FROM account WHERE id = ? FOR UPDATE";
+        String sleepSql = "SELECT pg_sleep(?)";
         int maxRetries = 100;
         long retryDelayMs = 1000;
 
@@ -78,6 +82,14 @@ public class JDBCBankAccountRepository implements BankAccountRepository {
                     lockStmt2.executeQuery();
                 }
 
+                // Perform the delay if specified
+                if (delay > 0) {
+                    try (PreparedStatement sleepStmt = conn.prepareStatement(sleepSql)) {
+                        sleepStmt.setDouble(1, delay);
+                        sleepStmt.executeQuery();
+                    }
+                }
+
                 // Perform the balance update
                 try (PreparedStatement withdrawStmt = conn.prepareStatement(withdrawSql);
                      PreparedStatement depositStmt = conn.prepareStatement(depositSql)) {
@@ -97,7 +109,7 @@ public class JDBCBankAccountRepository implements BankAccountRepository {
                 }
             } catch (SQLException e) {
                 if ("40001".equals(e.getSQLState())) { // SQLState for deadlock
-                    long sleepTime = retryDelayMs * (attempt + 1) + (long) (Math.random() * 5000);
+                    long sleepTime = retryDelayMs * (attempt + 1) + (long) (Math.random() * 500);
                     System.out.printf("Deadlock detected. Transfer attempt %d failed: %s -> %s, amount: %f. Retrying after %d ms...%n",
                             attempt + 1, from, to, amount, sleepTime);
                     Thread.sleep(sleepTime);

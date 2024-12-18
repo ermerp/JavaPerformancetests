@@ -16,7 +16,7 @@ public class TransactionExecutor {
     public void executeTransactionsSingle(List<Transaction> transactions) {
         for (Transaction transaction : transactions) {
             try {
-                repository.book(transaction.from(), transaction.to(), transaction.amount());
+                repository.book(transaction.from(), transaction.to(), transaction.amount(), 0.0);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -24,10 +24,11 @@ public class TransactionExecutor {
 
     }
 
-    public void executeTransactionsVirtual(List<Transaction> transactions) {
+    public void executeTransactionsVirtual(List<Transaction> transactions, double delay) {
+        int maxConnections = System.getenv("MAX_CONNECTIONS") != null ? Integer.parseInt(System.getenv("MAX_CONNECTIONS")) : 80;
         Semaphore semaphore = (repository instanceof PostgRESTBankAccountRepository)
-                ? new Semaphore(System.getenv("MAX_CONNECTIONS") != null ? Integer.parseInt(System.getenv("MAX_CONNECTIONS")) : 80)
-                : null;
+                ? new Semaphore(maxConnections)
+                : new Semaphore(maxConnections*2);
 
         try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
 
@@ -35,32 +36,32 @@ public class TransactionExecutor {
                 //startet neuen Virtual Thread
                 executor.submit(() -> {
                     try {
-                        if (semaphore != null) semaphore.acquire();
-                        repository.book(transaction.from(), transaction.to(), transaction.amount());
+                        semaphore.acquire();
+                        repository.book(transaction.from(), transaction.to(), transaction.amount(), delay);
                     } catch (Exception e) {
                         e.printStackTrace();
                     } finally {
-                        if (semaphore != null) semaphore.release();
+                        semaphore.release();
                     }
                 });
             }
         }
     }
 
-    public void executeTransactionsPlatform(List<Transaction> transactions) {
+    public void executeTransactionsPlatform(List<Transaction> transactions, double delay) {
 
+        int maxConnections = System.getenv("MAX_CONNECTIONS") != null ? Integer.parseInt(System.getenv("MAX_CONNECTIONS")) : 80;
         Semaphore semaphore = (repository instanceof PostgRESTBankAccountRepository)
-                ? new Semaphore(System.getenv("MAX_CONNECTIONS") != null ? Integer.parseInt(System.getenv("MAX_CONNECTIONS")) : 80)
+                ? new Semaphore(maxConnections)
                 : null;
 
-        try (ExecutorService executor = Executors.newCachedThreadPool()) {
+        try (ExecutorService executor = Executors.newFixedThreadPool(maxConnections*2)) {
 
             for (Transaction transaction : transactions) {
-                //startet neuen Virtual Thread
                 executor.submit(() -> {
                     try {
                         if (semaphore != null) semaphore.acquire();
-                        repository.book(transaction.from(), transaction.to(), transaction.amount());
+                        repository.book(transaction.from(), transaction.to(), transaction.amount(), delay);
                     } catch (Exception e) {
                         e.printStackTrace();
                     } finally {

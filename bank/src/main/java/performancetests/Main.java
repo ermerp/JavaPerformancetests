@@ -22,17 +22,21 @@ public class Main {
         String maxConnectionsStr = System.getenv("MAX_CONNECTIONS");
         int maxConnections = maxConnectionsStr != null ? Integer.parseInt(maxConnectionsStr) : 80;
 
-        String numberOfAccountsStr = System.getenv("NUMBER_Of_ACCOUNTS");
+        String numberOfAccountsStr = System.getenv("NUMBER_OF_ACCOUNTS");
         int numberOfAccounts = numberOfAccountsStr != null ? Integer.parseInt(numberOfAccountsStr) : 10;
 
         String numberOfTransactionsStr = System.getenv("NUMBER_OF_TRANSACTIONS");
         int numberOfTransactions = numberOfTransactionsStr != null ? Integer.parseInt(numberOfTransactionsStr) : 100;
 
+        String delayTransactionStr = System.getenv("DELAY_TRANSACTION");
+        double delayTransaction = delayTransactionStr != null ? Double.parseDouble(delayTransactionStr) : 0.0;
+
         System.out.println("Java:Bank - Interface: " + interfaceType
                 + ", Algorithm: " + algorithm
                 + ", Max connections: " + maxConnections
                 + ", Number of accounts: " + numberOfAccounts
-                + ", Number of transactions: " + numberOfTransactions);
+                + ", Number of transactions: " + numberOfTransactions
+                + ", Delay transaction: " + delayTransaction);
 
         BankAccountRepository repository = switch (interfaceType) {
             case "JDBC" -> new JDBCBankAccountRepository();
@@ -57,8 +61,8 @@ public class Main {
 
         TransactionExecutor transactionExecutor = new TransactionExecutor(repository);
         switch (algorithm) {
-            case "VIRTUAL" -> transactionExecutor.executeTransactionsVirtual(transactions);
-            case "PLATFORM" -> transactionExecutor.executeTransactionsPlatform(transactions);
+            case "VIRTUAL" -> transactionExecutor.executeTransactionsVirtual(transactions, delayTransaction);
+            case "PLATFORM" -> transactionExecutor.executeTransactionsPlatform(transactions, delayTransaction);
             case "SINGLE" -> transactionExecutor.executeTransactionsSingle(transactions);
             default -> throw new IllegalArgumentException("Unknown algorithm: " + algorithm);
         }
