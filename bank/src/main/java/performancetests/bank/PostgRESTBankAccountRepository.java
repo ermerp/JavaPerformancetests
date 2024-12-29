@@ -34,7 +34,6 @@ public class PostgRESTBankAccountRepository implements BankAccountRepository {
             sendRequest(connection, "{ \"from_id\": \"" + from + "\", \"to_id\": \"" + to + "\", \"amount\": " + amount + " }");
             int responseCode = connection.getResponseCode();
             if (responseCode == HttpURLConnection.HTTP_OK) {
-                //System.out.println(String.format("Transfer successful: %s -> %s, amount: %f", from, to, amount));
                 return responseCode;
             } else if (responseCode == HttpURLConnection.HTTP_INTERNAL_ERROR) {
                 attempt++;

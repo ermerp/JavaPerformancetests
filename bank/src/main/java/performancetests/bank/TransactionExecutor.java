@@ -33,7 +33,7 @@ public class TransactionExecutor {
         try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
 
             for (Transaction transaction : transactions) {
-                //startet neuen Virtual Thread
+                //start a new virtual thread
                 executor.submit(() -> {
                     try {
                         semaphore.acquire();
@@ -58,6 +58,7 @@ public class TransactionExecutor {
         try (ExecutorService executor = Executors.newFixedThreadPool(maxConnections*2)) {
 
             for (Transaction transaction : transactions) {
+                // start a new platform thread
                 executor.submit(() -> {
                     try {
                         if (semaphore != null) semaphore.acquire();

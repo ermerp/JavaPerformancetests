@@ -9,11 +9,11 @@ public class Main {
 
     public static void main(String[] args) {
 
+        // Retrieve the algorithm, list length, max depth, runs and warm up runs from the command line arguments
         String algorithm = (args.length > 0 && args[0] != null && !args[0].isEmpty())
                 ? args[0] : "virtual";
         int listLength = (args.length > 1 && args[1] != null && !args[1].isEmpty())
                 ? Integer.parseInt(args[1]) : 10000000;
-        //Max: 60000000
         int maxDepth = (args.length > 2 && args[2] != null && !args[2].isEmpty())
                 ? Integer.parseInt(args[2]) : 8;
         int runs = (args.length > 3 && args[3] != null && !args[3].isEmpty())
@@ -26,11 +26,14 @@ public class Main {
                 + ", Max depth: " + maxDepth
                 + ", Runs: " + runs + ", Warm up runs: " + warmUpRuns);
 
+        // Generate data
         File data = DataGenerator.generateData(listLength);
+        // Import data
         int[] list = DataImporter.importAccounts(data.getName());
 
         System.out.println("File imported.");
 
+        // Warm up runs
         for (int i = 0; i < warmUpRuns; i++) {
             int[] list2 = list.clone();
             runAlgorithm(algorithm, list2, maxDepth);
@@ -42,6 +45,7 @@ public class Main {
 
         time = System.currentTimeMillis();
 
+        // Runs the algorithm
         for (int i = 0; i < runs; i++) {
             int[] list2 = list.clone();
             runAlgorithm(algorithm, list2, maxDepth);
@@ -71,14 +75,5 @@ public class Main {
                 System.out.println("Unknown algorithm");
             }
         }
-
-//        int i = 0;
-//        for (int num : list) {
-//            System.out.print(num + ", ");
-//            i++;
-//            if(i > 1000){
-//                break;
-//            }
-//        }
     }
 }

@@ -4,7 +4,6 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
@@ -37,6 +36,7 @@ public class JDBCBankAccountRepository implements BankAccountRepository {
         return dataSource.getConnection();
     }
 
+    // creates a new account in the database
     @Override
     public int createAccount(String accountId, double balance) throws Exception {
         String sql = "INSERT INTO account (id, balance) VALUES (?, ?)";
@@ -47,6 +47,7 @@ public class JDBCBankAccountRepository implements BankAccountRepository {
         }
     }
 
+    // deletes all accounts from the database
     @Override
     public int deleteAllAccounts() throws Exception {
         String sql = "DELETE FROM account";
@@ -55,6 +56,7 @@ public class JDBCBankAccountRepository implements BankAccountRepository {
         }
     }
 
+    // transfers the balance from one account to another
     @Override
     public int book(String from, String to, double amount, double delay) throws Exception {
         String withdrawSql = "UPDATE account SET balance = balance - ? WHERE id = ?";
